@@ -136,7 +136,179 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  u8 au8Message1[] = "Press key3 to unlock" ; 
+   
+  LCDMessage(LINE1_START_ADDR, au8Message1);
+ LCDClearChars(LINE2_START_ADDR, 0);
+  
+ if( WasButtonPressed(BUTTON3) ){
+      
+  static u8 u8number=0;
+  if( IsButtonPressed(BUTTON0) ) {   /* The button is currently pressed, so make sure step over */ 
+    u8number=1; } else if( IsButtonPressed(BUTTON1) ) { u8number=2 ; } else if( IsButtonPressed(BUTTON2) ){ u8number=3 ; }
+   switch(u8number){
+  case 1 : {
+    LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+  
+     LedOn(WHITE); 
+  LedOn(BLUE); 
+  LedOn(GREEN); 
+  LedOn(ORANGE); 
+  u8 au8Message2[] = "Heart and Soul" ; 
+   
+  LCDMessage(LINE2_START_ADDR, au8Message2);
+ LCDClearChars(LINE2_START_ADDR, 0);
+  
+  static u16 au16NotesLeft[] = {F5, F5, F5, F5, F5, E5, D5, E5, F5, G5, A5, A5, A5, A5, A5, G5, F5, G5, A5, A5S, C6, F5, F5, D6, C6, A5S, A5, G5, F5, NO, NO};//             NO, NO, E6, G6, D6, D6, C6, B5, G6, D6, D6, C6, B5, E6, C6, C6, B5, A5, E5, E5, C6, C6, B5, B5, G5, G6, D6, D6, C6, B5, G6, D6, D6, C6, B5, E6, C6, C6, B5, A5, A5, G5, A5, E6, A5, A5, G5, A5, D6, C6, B5, G5, E5, D5*/};  
+  static u16 au16DurationLeft[] = {QN, QN, HN, EN, EN, EN, EN, EN, EN, QN, QN, QN, HN, EN, EN, EN, EN, EN, EN, QN,  HN, HN, EN, EN, EN, EN,  QN, QN, HN, HN, FN};          //   QN, QN, QN, QN, QN, QN, QN, EN, QN, QN, QN, EN, QN, QN, QN, QN, EN, EN, EN, EN, EN, EN, EN, EN, QN, QN, QN, EN, EN, QN, QN, QN, EN, EN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN*/};   
+  static u16 au16NoteTypeLeft[] = {RT, RT, HT, RT, RT, RT, RT, RT, RT, RT, RT, RT, HT, RT, RT, RT, RT, RT, RT, RT,  RT, HT, RT, RT, RT, RT,  RT, RT, RT, HT, HT};          //     RT, RT, RT, RT, RT, RT, RT, HT, RT, RT, RT, RT, HT, RT, RT, RT, RT, HT, RT, HT, RT, HT, RT, HT, RT, RT, RT, RT, HT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT};  
+  static u8 u8IndexLeft = 0;  
+  static u32 u32LeftTimer = 0;   
+  static u16 u16CurrentDurationLeft = 0;   
+  static u16 u16NoteSilentDurationLeft = 0;  
+  static u8 u8CurrentIndex = 0;
+  static bool bNoteActiveNextLeft = TRUE;
+  if(IsTimeUp(&u32LeftTimer, (u32)u16CurrentDurationLeft)) 
+  {     u32LeftTimer = G_u32SystemTime1ms;   
+  u8CurrentIndex = u8IndexLeft;          /* Set up to play current note */   
+  if(bNoteActiveNextLeft)    
+  {       if(au16NoteTypeLeft[u8CurrentIndex] == RT)    
+     { u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex] - REGULAR_NOTE_ADJUSTMENT;        
+       u16NoteSilentDurationLeft = REGULAR_NOTE_ADJUSTMENT;         
+       bNoteActiveNextLeft = FALSE;       }            
+  else if(au16NoteTypeLeft[u8CurrentIndex] == ST)  
+  {         u16CurrentDurationLeft = STACCATO_NOTE_TIME;  
+  u16NoteSilentDurationLeft = au16DurationLeft[u8CurrentIndex] - STACCATO_NOTE_TIME;         bNoteActiveNextLeft = FALSE;       } 
+       else if(au16NoteTypeLeft[u8CurrentIndex] == HT)  
+       {         u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex];         u16NoteSilentDurationLeft = 0;         bNoteActiveNextLeft = TRUE; 
+         u8IndexLeft++;    
+         if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )    
+         {           u8IndexLeft = 0;         }       } 
+       /* Set the buzzer frequency for the note (handle NO special case) */   
+         if(au16NotesLeft[u8CurrentIndex] != NO)     
+         {         PWMAudioSetFrequency(BUZZER2, au16NotesLeft[u8CurrentIndex]);         PWMAudioOn(BUZZER2);       }       
+         else     
+         {                         PWMAudioOff(BUZZER2);       }     }  
+  else     
+  {       PWMAudioOff(BUZZER2);  
+  u32LeftTimer = G_u32SystemTime1ms;    
+  u16CurrentDurationLeft = u16NoteSilentDurationLeft;  
+  bNoteActiveNextLeft = TRUE;            
+  u8IndexLeft++;      
+  if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )   
+  {         u8IndexLeft = 0;      }  } }
+  break;
+  }
+case 2 : {
+  LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+ 
+  
+  static u16 au16NotesLeft[] =   {G4,G4,A4,G4,C5,B4,G4,G4,A4,G4,D5,C5,G5,G5,G6,E5,C5,B4,C5,B4,A4,NO,NO,F5,F5,E5,C5,D5,C5,C5  };//NO, NO, E6, G6, D6, D6, C6, B5, G6, D6, D6, C6, B5, E6, C6, C6, B5, A5, E5, E5, C6, C6, B5, B5, G5, G6, D6, D6, C6, B5, G6, D6, D6, C6, B5, E6, C6, C6, B5, A5, A5, G5, A5, E6, A5, A5, G5, A5, D6, C6, B5, G5, E5, D5};  
+  static u16 au16DurationLeft[] = {EN,EN,QN,QN,EN,HN,EN,EN,QN,QN,EN,HN,EN,EN,QN,QN,EN,QN,HN,QN,QN,EN,EN,HN,HN,QN,HN,HN };//QN, QN, QN, QN, QN, QN, QN, EN, QN, QN, QN, EN, QN, QN, QN, QN, EN, EN, EN, EN, EN, EN, EN, EN, QN, QN, QN, EN, EN, QN, QN, QN, EN, EN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, QN};   
+  static u16 au16NoteTypeLeft[] = { RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT};//RT, RT, RT, RT, RT, RT, RT, HT, RT, RT, RT, RT, HT, RT, RT, RT, RT, HT, RT, HT, RT, HT, RT, HT, RT, RT, RT, RT, HT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT, RT};  
+  static u8 u8IndexLeft = 0;  
+  static u32 u32LeftTimer = 0;   
+  static u16 u16CurrentDurationLeft = 0;   
+  static u16 u16NoteSilentDurationLeft = 0;  
+  static u8 u8CurrentIndex = 0;
+  static bool bNoteActiveNextLeft = TRUE;
+  if(IsTimeUp(&u32LeftTimer, (u32)u16CurrentDurationLeft)) 
+  {     u32LeftTimer = G_u32SystemTime1ms;   
+  u8CurrentIndex = u8IndexLeft;           
+  if(bNoteActiveNextLeft)    
+  {       if(au16NoteTypeLeft[u8CurrentIndex] == RT)    
+     {
+       LedOn(PURPLE);
+        LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+ 
+       u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex] - REGULAR_NOTE_ADJUSTMENT;        
+       u16NoteSilentDurationLeft = REGULAR_NOTE_ADJUSTMENT;         
+       bNoteActiveNextLeft = FALSE;       }            
+  else if(au16NoteTypeLeft[u8CurrentIndex] == ST)  
+  {   LedPWM(CYAN,LED_PWM_100);      
+    LedOn(CYAN);
+     LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+ 
+    u16CurrentDurationLeft = STACCATO_NOTE_TIME;  
+  u16NoteSilentDurationLeft = au16DurationLeft[u8CurrentIndex] - STACCATO_NOTE_TIME;         bNoteActiveNextLeft = FALSE;       } 
+       else if(au16NoteTypeLeft[u8CurrentIndex] == HT)  
+       {   LedPWM(YELLOW,LED_PWM_100);       
+         LedOn(YELLOW);
+          LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+ 
+         u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex];         u16NoteSilentDurationLeft = 0;         bNoteActiveNextLeft = TRUE; 
+         u8IndexLeft++;    
+         if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )    
+         {           u8IndexLeft = 0;         }       } 
+       /* Set the buzzer frequency for the note (handle NO special case) */   
+         if(au16NotesLeft[u8CurrentIndex] != NO)     
+         {         PWMAudioSetFrequency(BUZZER2, au16NotesLeft[u8CurrentIndex]);         PWMAudioOn(BUZZER2);       }       
+         else     
+         {                         PWMAudioOff(BUZZER2);       }     }  
+  else     
+  {       PWMAudioOff(BUZZER2);  
+  u32LeftTimer = G_u32SystemTime1ms;    
+  u16CurrentDurationLeft = u16NoteSilentDurationLeft;  
+  bNoteActiveNextLeft = TRUE;            
+  u8IndexLeft++;      
+  if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )   
+  {         u8IndexLeft = 0;      }  } }
+  break;       
+   }
+case 3: {
+     LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+       
+  static u16 au16NotesLeft[] = {C5, D5, E5, C5, C5, D5, E5, C5, E5, F5, G5, E5, F5, G5, G5, A5, G5, F5, E5, C5, G5, A5, G5, F5, E5, C5, D5, G4, C5, D5, G4, C5}; 
+static u16 au16DurationLeft[] ={QN, QN, QN, QN, QN, QN, QN, QN, QN, QN, HN, QN, QN, HN, EN, EN, EN, EN, QN, QN, EN, EN, EN, EN, QN, QN, QN, QN, HN, QN, QN, HN};          
+static u16 au16NoteTypeLeft[] = {  RT, RT, RT, RT, RT, RT, RT, RT,RT, RT, RT, RT, RT, RT, RT, RT,RT, RT, RT, RT, RT, RT, RT, RT,RT, RT, RT, RT, RT, RT, RT, RT,};     
+static u8 u8IndexLeft = 0;  
+  static u32 u32LeftTimer = 0;   
+  static u16 u16CurrentDurationLeft = 0;   
+  static u16 u16NoteSilentDurationLeft = 0;  
+  static u8 u8CurrentIndex = 0;
+  static bool bNoteActiveNextLeft = TRUE;
+  if(IsTimeUp(&u32LeftTimer, (u32)u16CurrentDurationLeft)) 
+  {     u32LeftTimer = G_u32SystemTime1ms;   
+  u8CurrentIndex = u8IndexLeft;          /* Set up to play current note */   
+  if(bNoteActiveNextLeft)    
+  {       if(au16NoteTypeLeft[u8CurrentIndex] == RT)    
+     {  LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+   LedOn(BLUE);LedOn(GREEN); LedOn(ORANGE);
+      
+       u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex] - REGULAR_NOTE_ADJUSTMENT;        
+       u16NoteSilentDurationLeft = REGULAR_NOTE_ADJUSTMENT;         
+       bNoteActiveNextLeft = FALSE;       }            
+  else if(au16NoteTypeLeft[u8CurrentIndex] == ST)  
+  {    
+      LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+   LedOn(WHITE); LedOn(PURPLE);LedOn(YELLOW);
+  
+    u16CurrentDurationLeft = STACCATO_NOTE_TIME;  
+  u16NoteSilentDurationLeft = au16DurationLeft[u8CurrentIndex] - STACCATO_NOTE_TIME;         bNoteActiveNextLeft = FALSE;       } 
+       else if(au16NoteTypeLeft[u8CurrentIndex] == HT)  
+       {         
+         LedOff(WHITE);   LedOff(PURPLE); LedOff(BLUE); LedOff(CYAN);LedOff(GREEN); LedOff(YELLOW);  LedOff(ORANGE); LedOff(RED); 
+    LedOn(WHITE);LedOn(RED);
+         u16CurrentDurationLeft = au16DurationLeft[u8CurrentIndex];         u16NoteSilentDurationLeft = 0;         bNoteActiveNextLeft = TRUE; 
+         u8IndexLeft++;    
+         if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )    
+         {           u8IndexLeft = 0;         }       } 
+       /* Set the buzzer frequency for the note (handle NO special case) */   
+         if(au16NotesLeft[u8CurrentIndex] != NO)     
+         {         PWMAudioSetFrequency(BUZZER2, au16NotesLeft[u8CurrentIndex]);         PWMAudioOn(BUZZER2);       }       
+         else     
+         {                         PWMAudioOff(BUZZER2);       }     }  
+  else     
+  {       PWMAudioOff(BUZZER2);  
+  u32LeftTimer = G_u32SystemTime1ms;    
+  u16CurrentDurationLeft = u16NoteSilentDurationLeft;  
+  bNoteActiveNextLeft = TRUE;            
+  u8IndexLeft++;      
+  if(u8IndexLeft == sizeof(au16NotesLeft) / sizeof(u16) )   
+  {         u8IndexLeft = 0;      }  } }
+  break;
+  }}
+ }
 } /* end UserApp1SM_Idle() */
     
 
